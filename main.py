@@ -29,33 +29,47 @@ conn = psycopg2.connect(
 )
 
 @app.post("/upload")
-async def upload_image(image: UploadFile = File(...)):
+async def upload_image(file: UploadFile = File(...)):
     try:
         with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO imagess (image_data) VALUES (%s)", (image.file.read(),))
+            file_name, file_extension = os.path.splitext(file.filename)
+            file_content = await file.read()
+            cursor.execute("INSERT INTO files (name, extension, content) VALUES (%s, %s, %s)", (file_name, file_extension, file_content))
             conn.commit()
             return JSONResponse({"message": "Image uploaded successfully"})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-@app.get("/images")
-async def get_images(id: int):
+@app.get("/list")
+async def get_all_details():
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT image_data FROM imagess WHERE id = (%s)", (id,))
-            data_memoryview = cursor.fetchone()
-            # images = cursor.fetchone()
-            # image = images[0]
-            # bytesData = bytes(image)
-            # for file
-            data_bytes = bytes(data_memoryview[0])
-            data_bytes.decode('utf-8')
-            return Response(data_bytes)
-            # for image
-            # if bytesData:
-            #     return Response(content=bytesData, media_type="image/jpeg")
-            # else:
-            #     raise HTTPException(status_code=404, detail="Image not found")
+            cursor.execute("SELECT name, extension FROM files")
+            rows = cursor.fetchall()
+            file_list = []
+            for row in rows:
+              file_list.append(row[0] + row[1])
+            return file_list
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.get("/file")
+async def get_all_details(file_name_with_extension: str):
+    try:
+        with conn.cursor() as cursor:
+            file_name, file_extension = os.path.splitext(file_name_with_extension)
+            cursor.execute('SELECT * FROM files where name = (%s) and extension = (%s)', (file_name, file_extension,))
+            rows = cursor.fetchone()
+            name, extension, content = rows
+            byte_data = bytes(content)
+            if extension == '.txt':
+              decoded = byte_data.decode("utf-8")
+              return Response(decoded, media_type="text/plain") 
+            elif(extension == '.jpeg' or extension == '.png'):
+              # return byte_data
+              return Response(content=byte_data, media_type="image/jpeg")
+            else:
+                raise HTTPException(status_code=404, detail="File not found")
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
