@@ -6,10 +6,8 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
-import logging
 
 app = FastAPI()
-logger = logging.getLogger()
 
 # CORS configuration
 app.add_middleware(
@@ -34,13 +32,10 @@ conn = psycopg2.connect(
 async def upload_image(file: UploadFile = File(...)):
     try:
         with conn.cursor() as cursor:
-            logger.warning('This is a warning message : ', file)
-            logger.error('This is an error message : ', file)
-            logger.critical('This is a critical message : ', file)
-            file_name, file_extension = os.path.splitext(file.filename)
-            logger.warning('This is a warning message : ', file_name, file_extension)
-            logger.error('This is an error message : ', file_name, file_extension)
-            logger.critical('This is a critical message : ', file_name, file_extension)
+            parts = file.filename.split(".")
+            file_extension = "." + parts[-1]
+            file_name = ".".join(parts[:-1])
+            # file_name, file_extension = os.path.splitext(file.filename)
             file_content = await file.read()
             cursor.execute("INSERT INTO files (name, extension, content) VALUES (%s, %s, %s)", (file_name, file_extension, file_content))
             conn.commit()
