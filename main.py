@@ -31,11 +31,11 @@ conn = psycopg2.connect(
 @app.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
     try:
-        with conn.cursor() as cursor:
-            parts = file.filename.split(".")
-            file_extension = "." + parts[-1]
-            file_name = ".".join(parts[:-1])
-            return JSONResponse({"message": "Image uploaded successfully", "file extension": file_extension, "file_name": file_name})
+        # with conn.cursor() as cursor:
+        return JSONResponse({"message": "Image uploaded successfully", "file name": file.filename})
+            # parts = file.filename.split(".")
+            # file_extension = "." + parts[-1]
+            # file_name = ".".join(parts[:-1])
             # file_name, file_extension = os.path.splitext(file.filename)
             # file_content = await file.read()
             # cursor.execute("INSERT INTO files (name, extension, content) VALUES (%s, %s, %s)", (file_name, file_extension, file_content))
