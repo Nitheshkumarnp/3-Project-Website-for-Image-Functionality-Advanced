@@ -1,5 +1,3 @@
-from http.client import HTTPResponse
-import json
 import psycopg2
 from fastapi import FastAPI, UploadFile, File, Response, HTTPException
 from fastapi.responses import JSONResponse
@@ -31,16 +29,10 @@ conn = psycopg2.connect(
 @app.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
     try:
-        # with conn.cursor() as cursor:
-        return JSONResponse({"message": "Image uploaded successfully", "file name": file.filename})
-            # parts = file.filename.split(".")
-            # file_extension = "." + parts[-1]
-            # file_name = ".".join(parts[:-1])
-            # file_name, file_extension = os.path.splitext(file.filename)
-            # file_content = await file.read()
-            # cursor.execute("INSERT INTO files (name, extension, content) VALUES (%s, %s, %s)", (file_name, file_extension, file_content))
-            # conn.commit()
-            # return JSONResponse({"message": "Image uploaded successfully"})
+        with conn.cursor() as cursor:
+            cursor.execute("INSERT INTO imagess (image_data) VALUES (%s)", (image.file.read(),))
+            conn.commit()
+            return JSONResponse({"message": "Image uploaded successfully"})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
