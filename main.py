@@ -30,7 +30,9 @@ conn = psycopg2.connect(
 async def upload_image(uploadedFile: UploadFile = File(...)):
     try:
         with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO imagess (image_data) VALUES (%s)", (uploadedFile.file.read(),))
+            file_name, file_extension = os.path.splitext(uploadedFile.filename)
+            file_content = await uploadedFile.read()
+            cursor.execute("INSERT INTO files (name, extension, content) VALUES (%s, %s, %s)", (file_name, file_extension, file_content))
             conn.commit()
             return JSONResponse({"message": "Image uploaded successfully"})
     except Exception as e:
