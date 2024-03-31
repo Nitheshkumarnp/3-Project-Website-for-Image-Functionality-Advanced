@@ -49,7 +49,7 @@ async def get_all_details():
             file_list = []
             for row in rows:
               file_list.append(row[0] + row[1])
-            return file_list
+            return JSONResponse({"fileList": file_list})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
