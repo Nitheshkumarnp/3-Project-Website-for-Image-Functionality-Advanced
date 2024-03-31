@@ -27,7 +27,7 @@ conn = psycopg2.connect(
 )
 
 @app.post("/upload")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(image: UploadFile = File(...)):
     try:
         with conn.cursor() as cursor:
             cursor.execute("INSERT INTO imagess (image_data) VALUES (%s)", (image.file.read(),))
