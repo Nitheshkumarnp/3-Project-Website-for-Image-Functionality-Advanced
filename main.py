@@ -38,6 +38,14 @@ async def upload_image(uploadedFile: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
+@app.post("/test")
+async def upload_file(audio_file: UploadFile = File(...)):
+    # return StreamingResponse(file.file, media_type="audio/wav")
+    #contents = await file.read()
+    # You can process the audio file here (e.g., save it, perform analysis, etc.)
+    # For demonstration, let's just return a success message
+    return JSONResponse(content={"message": "Audio received and processed successfully"})
+
 @app.get("/list")
 async def get_all_details():
     try:
